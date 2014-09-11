@@ -3,39 +3,56 @@ import pprint
 import os
 import whoosh.index
 import whoosh.fields
+import whoosh.qparser
 import packages
 import config
 
 pp = pprint.PrettyPrinter(indent=4)
 
-packages = packages.get_from_db('6')
+INDICES_DIR = config.DATA_DIR + 'index'
 
-#pp.pprint(packages)
+def _index_dir(version):
+    return INDICES_DIR + '/' + version
 
-schema = whoosh.fields.Schema(name=whoosh.fields.ID(stored=True),
-                              description=whoosh.fields.TEXT(stored=True),
-                              summary=whoosh.fields.TEXT(stored=True),
-                              arch=whoosh.fields.ID(stored=True),
-                              primary_repo=whoosh.fields.ID(stored=True),
-                              updates_repo=whoosh.fields.ID(stored=True),
-                              version=whoosh.fields.ID(stored=True),
-                              updates_version=whoosh.fields.ID(stored=True),
-                              epoch=whoosh.fields.ID(stored=True),
-                              updates_epoch=whoosh.fields.ID(stored=True),
-                              release=whoosh.fields.ID(stored=True),
-                              updates_release=whoosh.fields.ID(stored=True),
-                              url=whoosh.fields.ID(stored=True),
-                              location_href=whoosh.fields.ID(stored=True),
-                              updates_location_href=whoosh.fields.ID(stored=True),
-                              license=whoosh.fields.ID(stored=True))
 
-index_dir = config.DATA_DIR + 'index'
-if not os.path.exists(index_dir):
-    os.mkdir(index_dir)
-ix = whoosh.index.create_in(index_dir, schema)
-ix_writer = ix.writer()
+def _write_index(version):
+    packages_dict = packages.get(version)
 
-for package in packages:
-    ix_writer.add_document(**package)
+    schema = whoosh.fields.Schema(name=whoosh.fields.TEXT(stored=True, field_boost=12.0),
+                                  description=whoosh.fields.TEXT,
+                                  summary=whoosh.fields.TEXT(field_boost=2.5),
+                                  arch=whoosh.fields.ID,
+                                  primary_repo=whoosh.fields.ID,
+                                  version=whoosh.fields.ID,
+                                  epoch=whoosh.fields.ID,
+                                  release=whoosh.fields.ID,
+                                  url=whoosh.fields.ID,
+                                  location_href=whoosh.fields.ID,
+                                  license=whoosh.fields.ID,
+                                  repo=whoosh.fields.ID(stored=True),
+                                  pkgKey=whoosh.fields.NUMERIC)
 
-ix_writer.commit()
+    index_dir = _index_dir(version)
+    if not os.path.exists(index_dir):
+        os.mkdir(index_dir)
+
+    ix = whoosh.index.create_in(index_dir, schema)
+    ix_writer = ix.writer()
+
+    for name in packages_dict:
+        ix_writer.add_document(**packages_dict[name][-1])
+    ix_writer.commit()
+
+
+def write_indices():
+    for version in config.VERSIONS:
+        _write_index(version)
+
+
+def ix_factory(version):
+    index_dir = _index_dir(version)
+    return whoosh.index.open_dir(index_dir)
+
+
+def parser_factory(ix):
+    return whoosh.qparser.MultifieldParser(["name", "summary", 'description'], ix.schema)

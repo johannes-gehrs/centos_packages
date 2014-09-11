@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, unicode_literals
-import requests
+import json
+import pprint
 import xml.etree.ElementTree as ElT
 import bz2
 import io
@@ -7,25 +8,30 @@ import os
 import uuid
 import sqlite3
 import config
+import re
+import datetime
+import pickle
+import requests
 
 REPODATA_SUFFIX = "x86_64/"
 METADATA_SUFFIX = "repodata/repomd.xml"
-REPOSITORIES = ['os', 'updates', 'centosplus', 'extras', 'fasttrack']
+PACKAGE_TIMESTAMP_FILE = config.DATA_DIR + 'packages_timestamp.json'
 
 
 def _find_db_link_in_xml(xml_text):
     root = ElT.fromstring(xml_text)
 
-    for data_e in root.iter('{http://linux.duke.edu/metadata/repo}data'):
-        if data_e.attrib['type'] == 'primary_db':
-            return data_e.find('{http://linux.duke.edu/metadata/repo}location').attrib['href']
+    for data_elmnt in root.iter('{http://linux.duke.edu/metadata/repo}data'):
+        if data_elmnt.attrib['type'] == 'primary_db':
+            return data_elmnt.find('{http://linux.duke.edu/metadata/repo}location').attrib['href']
     else:
         raise ValueError('Data not found in XML')
 
 
-def get_from_web(version):
-    for repo in REPOSITORIES:
-        repo_base_url = config.REPO_BASE_URL + unicode(version) + '/' + repo + '/' + REPODATA_SUFFIX
+def _download_one(version):
+    for repo in config.active_repos():
+        repo_base_url = config.REPO_BASE_URL + unicode(version) + \
+                        '/' + repo + '/' + REPODATA_SUFFIX
         metadata_request_ulr = repo_base_url + METADATA_SUFFIX
         metadata_request = requests.get(metadata_request_ulr)
         db_href = _find_db_link_in_xml(metadata_request.text)
@@ -42,95 +48,82 @@ def get_from_web(version):
             file.write(database)
         os.rename(temp_filename, final_filename)
 
-#get_repo_data_from_web('6')
 
-def conn_factory(version, repo):
-    conn =  sqlite3.connect(config.DATA_DIR + repo + '_' + version + '.sqlite')
+def download():
+    for version in config.VERSIONS:
+        _download_one(version)
+
+
+def _conn_factory(version, repo):
+    conn = sqlite3.connect(config.DATA_DIR + repo + '_' + version + '.sqlite')
+    conn.row_factory = sqlite3.Row
     return conn
 
 
-def _primary_data_query_execute(conn):
+def _primary_query_execute(conn, repo):
     c = conn.cursor()
     query = '''
             SELECT name, arch, version, epoch,
-                "release", summary, description,
-                url, rpm_license, location_href
+                ? AS repo, "release", summary, description,
+                url, rpm_license AS license, location_href, pkgKey
             FROM packages
             WHERE 1=1
+            --    AND name = 'kernel'
             --LIMIT 15
             '''
-    c.execute(query)
+    c.execute(query, (repo,))
     return c.fetchall()
 
-def _updates_data_query_execute(conn, name):
+
+def _read_from_dbs(version):
+    package_list = []
+    for repo in config.active_repos():
+        conn = _conn_factory(version, repo)
+        package_list = package_list + _primary_query_execute(conn, repo)
+    return package_list
+
+
+def _prepare(package_list):
+    prepared = {}
+    for row in package_list:
+        prepared.setdefault(row[b'name'], []).append(dict(row))
+
+    for name in prepared:
+        prepared[name].sort(key=absolute_version)
+
+    return prepared
+
+
+def absolute_version(package):
+    return '_'.join([package['epoch'], package['version'], package['release']])
+
+
+def get(version):
+    return _prepare(_read_from_dbs(version))
+
+
+def minor_os_release(version):
+    conn = _conn_factory(version, 'os')
     c = conn.cursor()
     query = '''
-            SELECT name,
-                max(
-                CASE WHEN epoch IS NULL THEN 0 ELSE epoch end || '-'
-                    || version || '-'
-                    || release) absolute_version,
-                version, epoch, release, location_href
+            SELECT "release"
             FROM packages
             WHERE 1=1
-                AND name = ?
-            GROUP BY name
+                AND name = 'centos-release'
             '''
-    c.execute(query, (name,))
-    return c.fetchall()
+    c.execute(query)
+    row = c.fetchone()
+    match = re.match(r'.*?\.', row[b'release'])
+    return match.group()[:-1]
 
 
-def _read_primary_data_from_db(version):
-    conn_os = conn_factory(version, 'os')
-
-    conn_extras = conn_factory(version, 'extras')
-    conn_centosplus = conn_factory(version, 'centosplus')
-
-    base_data = [e + ('base',) for e in _primary_data_query_execute(conn_os)]
-    extras_data = [e + ('extras',) for e in _primary_data_query_execute(conn_extras)]
-    #centosplus_data = [e + ('centosplus',) for e in primary_data_query_execute(conn_centosplus)]
-    return base_data + extras_data
+def set_timestamp_to_now():
+    now = datetime.datetime.now()
+    with io.open(PACKAGE_TIMESTAMP_FILE, mode='wb') as file:
+        pickle.dump(now, file)
 
 
-def _read_matching_updates_from_db(version, name):
-    conn_fasttrack = conn_factory(version, 'fasttrack')
-    conn_updates = conn_factory(version, 'updates')
+def get_timestamp():
+    with io.open(PACKAGE_TIMESTAMP_FILE, mode='rb') as file:
+        pickle.load(file)
 
-    base_updates_data = [e + ('updates',) for e in _updates_data_query_execute(conn_updates, name)]
-    fasttrack_data = [e + ('fasttrack',) for e in _updates_data_query_execute(conn_fasttrack, name)]
-    return base_updates_data + fasttrack_data
-
-
-def get_from_db(version):
-    primary_data = _read_primary_data_from_db(version)
-    prepared_data = []
-
-    for row in primary_data:
-        package = {
-            'name': row[0],
-            'arch': row[1],
-            'version': row[2],
-            'epoch': row[3],
-            'release': row[4],
-            'summary': row[5],
-            'description': row[6],
-            'url': row[7],
-            'license': row[8],
-            'location_href': row[9],
-            'primary_repo': row[10]
-        }
-        
-        matching_updates = _read_matching_updates_from_db(version, package['name'])
-        if matching_updates:
-            if len(matching_updates) > 1:
-                raise RuntimeError("There shouldn't be more than one matching update")
-            matching_update = matching_updates[0]
-            package_update = {'updates_version': matching_update[2],
-                              'updates_epoch': matching_update[3],
-                              'updates_release': matching_update[4],
-                              'updates_location_href': matching_update[5],
-                              'updates_repo': matching_update[6]}
-            package.update(package_update)
-        prepared_data.append(package)
-
-    return prepared_data
