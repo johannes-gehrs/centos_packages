@@ -15,7 +15,7 @@ import requests
 
 REPODATA_SUFFIX = "x86_64/"
 METADATA_SUFFIX = "repodata/repomd.xml"
-PACKAGE_TIMESTAMP_FILE = config.DATA_DIR + 'packages_timestamp.json'
+PACKAGE_TIMESTAMP_FILE = config.DATA_DIR + 'packages_timestamp.pickled'
 
 
 def _find_db_link_in_xml(xml_text):
@@ -95,7 +95,12 @@ def _prepare(package_list):
 
 
 def absolute_version(package):
-    return '_'.join([package['epoch'], package['version'], package['release']])
+    def _not_none_epoch(epoch):
+        if epoch is not None:
+            return epoch
+        return '0'
+
+    return '_'.join([_not_none_epoch(package['epoch']), package['version'], package['release']])
 
 
 def get(version):
