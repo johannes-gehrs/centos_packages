@@ -1,6 +1,4 @@
 from __future__ import absolute_import, division, unicode_literals
-import json
-import pprint
 import xml.etree.ElementTree as ElT
 import bz2
 import io
@@ -103,8 +101,15 @@ def absolute_version(package):
     return '_'.join([_not_none_epoch(package['epoch']), package['version'], package['release']])
 
 
-def get(version):
+def get_version(version):
     return _prepare(_read_from_dbs(version))
+
+
+def get_all():
+    packages_dict = {}
+    for version in config.VERSIONS:
+        packages_dict[version] = get_version(version)
+    return packages_dict
 
 
 def minor_os_release(version):

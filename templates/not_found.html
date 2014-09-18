@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <h1>Sorry!</h1>
+    <p>This page wasn't found.<p>
+    <p><a href="{{ url_for('root') }}">Go to Homepage.</a></p>
+    <p><i>{{ error }}</i></p>
+</div>
+{% endblock %}

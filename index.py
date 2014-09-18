@@ -16,7 +16,7 @@ def _index_dir(version):
 
 
 def _write_index(version):
-    packages_dict = packages.get(version)
+    packages_dict = packages.get_version(version)
 
     schema = whoosh.fields.Schema(name=whoosh.fields.TEXT(stored=True, field_boost=12.0),
                                   description=whoosh.fields.TEXT,

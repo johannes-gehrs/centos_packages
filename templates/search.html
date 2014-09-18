@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="text-center">
+        <h1>Search CentOS packages online</h1>
+        <p class="lead"><a href="http://centos-packages.com">centos-packages.com</a></p>
+    </div>
+    <div class="search-area well">
+        <div class="btn-group btn-group-justified">
+            <a href="{{ url_for('search', version='6') }}" class="btn btn-primary {% if version == '6' %} active {% endif %}">6</a>
+            <a href="{{ url_for('search', version='7') }}" class="btn btn-primary{% if version == '7' %} active {% endif %}">7</a>
+        </div>
+        <form class="search-box text-center" role="form" method="post" action="{{ url_for('search', version=version) }}">
+            <div class="form-group">
+                <input class="form-control input-lg" type="text" name="search_term">
+            </div>
+            <button type="submit" class="btn-lg btn-primary">Go</button>
+        </form>
+    </div>
+
+{% endblock content %}
