@@ -21,7 +21,7 @@
             {% for package in versions %}
                 <tr>
                     <td>{{ package.version }} ({{ package.release }})</td>
-                    <td>{{ package.repo }}</td>
+                    <td>{{ pretty_repo_name(package.repo) }}</td>
                 </tr>
             {% endfor %}
             </tbody>

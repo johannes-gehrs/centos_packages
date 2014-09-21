@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 from flask import Flask, render_template, redirect, url_for, request, abort, flash
 import packages
+import config
 
 app = Flask(__name__)
 all_packages_dict = packages.get_all()
@@ -11,6 +12,13 @@ def inject_minor_os_release():
     def _minor_os_release(version):
         return packages.minor_os_release(all_packages_dict[version])
     return dict(minor_os_release=_minor_os_release)
+
+
+@app.context_processor
+def inject_pretty_repo_names():
+    def _pretty_repo_name(repo):
+        return config.REPOSITORIES_PRETTY[repo]
+    return dict(pretty_repo_name=_pretty_repo_name)
 
 
 @app.errorhandler(404)
