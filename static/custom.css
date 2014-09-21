@@ -1,12 +1,36 @@
 .search-area {
     margin-top: 2em;
     margin-bottom: 1em;
+    max-width: 700px;
+    margin: auto;
 }
 
 .search-box {
     margin-top: 0.5em;
+    width: 100%;
 }
 
-#footer {
-    margin-top: 3em;
+.footer {
+    margin-top: 4em;
+}
+
+.package-sidebar {
+    margin-top: 25px
+}
+
+.glyphicon-sidebar {
+    margin-right: 1em;
+    color: #ebebeb;
+}
+
+.package-versions-table {
+    max-width: 500px;
+}
+
+.my-breadcrumbs {
+    margin-top: 1em;
+}
+
+.well-headsup {
+    margin-top: 1em;
 }

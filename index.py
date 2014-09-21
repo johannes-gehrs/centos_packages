@@ -22,7 +22,6 @@ def _write_index(version):
                                   description=whoosh.fields.TEXT,
                                   summary=whoosh.fields.TEXT(field_boost=2.5),
                                   arch=whoosh.fields.ID,
-                                  primary_repo=whoosh.fields.ID,
                                   version=whoosh.fields.ID,
                                   epoch=whoosh.fields.ID,
                                   release=whoosh.fields.ID,
@@ -30,7 +29,8 @@ def _write_index(version):
                                   location_href=whoosh.fields.ID,
                                   license=whoosh.fields.ID,
                                   repo=whoosh.fields.ID(stored=True),
-                                  pkgKey=whoosh.fields.NUMERIC)
+                                  pkgKey=whoosh.fields.NUMERIC,
+                                  rpm_sourcerpm=whoosh.fields.ID)
 
     index_dir = _index_dir(version)
     if not os.path.exists(index_dir):
@@ -45,7 +45,7 @@ def _write_index(version):
 
 
 def write_indices():
-    for version in config.VERSIONS:
+    for version in config.OS_VERSIONS:
         _write_index(version)
 
 

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="col-md-8 main-package-content">
+        {% if direct_hit %}
+            <div class="well well-headsup">
+                <p>Your query directly matches a package name. <a>
+                    Full search.</a></p>
+            </div>
+        {% endif %}
+        <h1>{{ package.name }}</h1>
+
+        <p class="lead">{{ package.summary }}</p>
+
+        <p>{{ package.description }}</p>
+        <table class="table table-striped">
+            <tbody>
+            <tr>
+                <td>Version (latest package release)</td>
+                <td>{{ package.version }} ({{ package.release }})</td>
+            </tr>
+            <tr>
+                <td>Repository containing release</td>
+                <td>{{ package.repo }}</td>
+            </tr>
+            <tr>
+                <td>Architecture (in the x86_64 distribution)</td>
+                <td>{{ package.arch }}</td>
+            </tr>
+            <tr>
+                <td>License</td>
+                <td>{{ package.license }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-4 package-sidebar">
+        <ul class="list-unstyled">
+            <li><a href="{{ package.url }}"><span
+                    class="glyphicon glyphicon-new-window glyphicon-sidebar"></span>
+                Vendor
+                website</a></li>
+            <li><a href="{{ download_url }}"><span
+                    class="glyphicon glyphicon-cloud-download glyphicon-sidebar"></span>
+                Download RPM ({{ package.arch }})</a></li>
+            </li>
+            <li>
+                <a href="{{ url_for('package_versions', os_version=os_version, package_name=package.name) }}"><span
+                        class="glyphicon glyphicon-sort-by-attributes-alt glyphicon-sidebar"></span>
+                    Package versions</a>
+            </li>
+        </ul>
+
+    </div>
+
+{% endblock content %}

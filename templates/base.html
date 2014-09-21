@@ -10,15 +10,21 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-    <link href="{{ url_for('static', filename='superhero/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='bootstrap/css/bootstrap-superhero.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='custom.css') }}" rel="stylesheet">
 </head>
 <body>
+<div class="btn-group-sm btn-group-justified">
+    <a href="{{ url_for('search', os_version='6') }}"
+       class="btn btn-primary {% if os_version == '6' %} active {% endif %}">{{ minor_os_release('6') }}</a>
+    <a href="{{ url_for('search', os_version='7') }}"
+       class="btn btn-primary{% if os_version == '7' %} active {% endif %}">{{ minor_os_release('7') }}</a>
+</div>
 <div class="container">
     {% block content %}
         <h1>Hello, world!</h1>
     {% endblock content %}
-    <footer id="footer">
+    <div class="col-md-8 footer">
         <div>
             <ul class="list-inline">
                 <li><a href="#">About this project.</a></li>
@@ -26,9 +32,12 @@
                 <li><a href="#">Github.</a></li>
             </ul>
         </div>
-    </footer>
+    </div>
 </div>
+{% block scripts %}
 <script src="{{ url_for('static', filename='jquery.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}"></script>
+<script src="{{ url_for('static', filename='custom.js') }}"></script>
+{% endblock scripts %}
 </body>
 </html>

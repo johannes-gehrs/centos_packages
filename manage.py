@@ -26,7 +26,7 @@ def _index_refresh():
 
 
 def _search(term, version):
-    if not version in config.VERSIONS:
+    if not version in config.OS_VERSIONS:
         print "Unknown version."
         sys.exit(1)
 
