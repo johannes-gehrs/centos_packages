@@ -8,6 +8,7 @@ REPOSITORIES_PRETTY = {'os': 'Base',
                        'updates': 'Updates',
                        'extras': 'Extras',
                        'fasttrack': 'Fasttrack'}
+LIMIT_RESULTS = 250
 
 
 def active_repos():

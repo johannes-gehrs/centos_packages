@@ -25,17 +25,17 @@ def _index_refresh():
     print _stopwatch(start_time)
 
 
-def _search(term, version):
-    if not version in config.OS_VERSIONS:
-        print "Unknown version."
+def _search(query, os_version):
+    if not os_version in config.OS_VERSIONS:
+        print "Unknown os_version."
         sys.exit(1)
 
-    ix = index.ix_factory(version)
+    ix = index.ix_factory(os_version)
     searcher = ix.searcher()
     parser = index.parser_factory(ix)
 
     start_time = time.time()
-    results = searcher.search(parser.parse(term))
+    results = searcher.search(parser.parse(query))
     for result in results:
         print result
     print _stopwatch(start_time)
@@ -54,7 +54,7 @@ parser.add_argument('--index',
                     help='Recreate the search index from the repo data.',
                     action='store_true')
 parser.add_argument('--search',
-                    help='Search for a term from the commmand line.',
+                    help='Search for packages from the commmand line.',
                     action='store')
 parser.add_argument('--version',
                     help='Only with "search" and "timestamp" option. '

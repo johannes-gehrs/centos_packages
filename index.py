@@ -11,12 +11,13 @@ pp = pprint.PrettyPrinter(indent=4)
 
 INDICES_DIR = config.DATA_DIR + 'index'
 
-def _index_dir(version):
-    return INDICES_DIR + '/' + version
+
+def _index_dir(os_version):
+    return INDICES_DIR + '/' + os_version
 
 
-def _write_index(version):
-    packages_dict = packages.get_version(version)
+def _write_index(os_version):
+    packages_dict = packages.get_version(os_version)
 
     schema = whoosh.fields.Schema(name=whoosh.fields.TEXT(stored=True, field_boost=12.0),
                                   description=whoosh.fields.TEXT,
@@ -32,7 +33,7 @@ def _write_index(version):
                                   pkgKey=whoosh.fields.NUMERIC,
                                   rpm_sourcerpm=whoosh.fields.ID)
 
-    index_dir = _index_dir(version)
+    index_dir = _index_dir(os_version)
     if not os.path.exists(index_dir):
         os.mkdir(index_dir)
 
@@ -45,8 +46,8 @@ def _write_index(version):
 
 
 def write_indices():
-    for version in config.OS_VERSIONS:
-        _write_index(version)
+    for os_version in config.OS_VERSIONS:
+        _write_index(os_version)
 
 
 def ix_factory(version):

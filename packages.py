@@ -14,14 +14,14 @@ import requests
 REPODATA_ARC_SUFFIX = "x86_64/"
 METADATA_SUFFIX = "repodata/repomd.xml"
 PACKAGE_TIMESTAMP_FILE = config.DATA_DIR + 'packages_timestamp.pickled'
-
+YUM_REPODATA_XML_NAMESPACE = 'http://linux.duke.edu/metadata/repo'
 
 def _find_db_link_in_xml(xml_text):
     root = ElT.fromstring(xml_text)
 
-    for data_elmnt in root.iter('{http://linux.duke.edu/metadata/repo}data'):
+    for data_elmnt in root.iter('{' + YUM_REPODATA_XML_NAMESPACE + '}data'):
         if data_elmnt.attrib['type'] == 'primary_db':
-            return data_elmnt.find('{http://linux.duke.edu/metadata/repo}location').attrib['href']
+            return data_elmnt.find('{' + YUM_REPODATA_XML_NAMESPACE + '}location').attrib['href']
     else:
         raise ValueError('Data not found in XML')
 
@@ -180,15 +180,16 @@ def minor_os_release(all_packages_dict):
 
 def set_timestamp_to_now():
     now = datetime.datetime.now()
-    with io.open(PACKAGE_TIMESTAMP_FILE, mode='wb') as file:
-        pickle.dump(now, file)
+    with io.open(PACKAGE_TIMESTAMP_FILE, mode='wb') as myfile:
+        pickle.dump(now, myfile)
 
 
 def get_timestamp():
-    with io.open(PACKAGE_TIMESTAMP_FILE, mode='rb') as file:
-        pickle.load(file)
+    with io.open(PACKAGE_TIMESTAMP_FILE, mode='rb') as myfile:
+        pickle.load(myfile)
 
 
-def rpm_download_url(package_version, version):
-    return config.REPO_BASE_URL + version + '/' + package_version['repo'] + \
+def rpm_download_url(package_version, os_version):
+    return config.REPO_BASE_URL + os_version + '/' + package_version['repo'] + \
            '/' + REPODATA_ARC_SUFFIX + package_version['location_href']
+

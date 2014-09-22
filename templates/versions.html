@@ -9,12 +9,13 @@
     <div class="col-md-12">
         <h1>{{ versions.0.name }}</h1>
 
-        <p class="lead">All package versions in descending order.</p>
-        <table class="table table-striped table-hover package-versions-table">
+        <p class="lead">All package versions (in the current x86_64 distribution) in descending order.</p>
+        <table class="table table-striped package-versions-table">
             <thead>
             <tr>
                 <th>Version (release)</th>
                 <th>Repository</th>
+                <th>Architecture</th>
             </tr>
             </thead>
             <tbody>
@@ -22,6 +23,7 @@
                 <tr>
                     <td>{{ package.version }} ({{ package.release }})</td>
                     <td>{{ pretty_repo_name(package.repo) }}</td>
+                    <td>{{ package.arch }}</td>
                 </tr>
             {% endfor %}
             </tbody>
