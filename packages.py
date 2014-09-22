@@ -193,3 +193,9 @@ def rpm_download_url(package_version, os_version):
     return config.REPO_BASE_URL + os_version + '/' + package_version['repo'] + \
            '/' + REPODATA_ARC_SUFFIX + package_version['location_href']
 
+
+def newest_versions_as_list(os_version, all_packages_dict):
+    newest_versions_list = []
+    for package_name in all_packages_dict[os_version]:
+        newest_versions_list.append(all_packages_dict[os_version][package_name][-1])
+    return newest_versions_list

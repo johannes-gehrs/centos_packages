@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block page_title %}
+    All packages
+{% endblock page_title %}
+{% block content %}
+    <div class="search-results">
+        {% for package_version in newest_versions %}
+            <div class="list-group">
+                <a href="{{ url_for('package', os_version=os_version, package_name=package_version.name) }}"
+                   class="list-group-item">
+                    <h4 class="list-group-item-heading">{{ package_version.name }} {{ package_version.version }}</h4>
+
+                    <p class="list-group-item-text">{{ package_version.summary }}</p>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock content %}

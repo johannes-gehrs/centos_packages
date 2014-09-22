@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block page_title %}
+    Results for '{{ query }}'
+{% endblock page_title %}
 {% block content %}
     <div class="well">
         <form role="form" method="post" action="{{ url_for('search', os_version=os_version) }}">
@@ -21,7 +24,7 @@
             <div class="list-group">
                 <a href="{{ url_for('package', os_version=os_version, package_name=package_version.name) }}"
                    class="list-group-item">
-                    <h4 class="list-group-item-heading">{{ package_version.name }} {{ package_version.version }}({{ package_version.release }})</h4>
+                    <h4 class="list-group-item-heading">{{ package_version.name }} {{ package_version.version }}</h4>
 
                     <p class="list-group-item-text">{{ package_version.summary }}</p>
                 </a>

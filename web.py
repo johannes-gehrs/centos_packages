@@ -34,7 +34,7 @@ def root():
     return redirect(url_for('search', os_version='6'))
 
 
-@app.route('/<os_version>', methods=['GET', 'POST'])
+@app.route('/<os_version>/', methods=['GET', 'POST'])
 def search(os_version):
     if request.method == 'POST':
         search_query = request.form['search_query']
@@ -43,8 +43,8 @@ def search(os_version):
                                     os_version=os_version,
                                     package_name=search_query,
                                     direct=True))
-
-        return redirect(url_for('search_results', os_version=os_version, query=search_query))
+        if search_query:
+            return redirect(url_for('search_results', os_version=os_version, query=search_query))
     return render_template('search.html', os_version=os_version)
 
 
@@ -56,7 +56,7 @@ def _package_versions_or_404(os_version, package_name):
         return abort(404)
 
 
-@app.route('/<os_version>/package/<package_name>', methods=['GET'])
+@app.route('/<os_version>/package/<package_name>/', methods=['GET'])
 def package(os_version, package_name):
     package_versions_list = _package_versions_or_404(os_version, package_name)
     return render_template('package.html',
@@ -67,7 +67,7 @@ def package(os_version, package_name):
                            direct_hit=request.args.get('direct'))
 
 
-@app.route('/<os_version>/package/<package_name>/versions', methods=['GET'])
+@app.route('/<os_version>/package/<package_name>/versions/', methods=['GET'])
 def package_versions(os_version, package_name):
     package_versions_list = _package_versions_or_404(os_version, package_name)
     return render_template('versions.html',
@@ -75,7 +75,7 @@ def package_versions(os_version, package_name):
                            os_version=os_version)
 
 
-@app.route('/<os_version>/results/<query>', methods=['GET'])
+@app.route('/<os_version>/results/<query>/', methods=['GET'])
 def search_results(os_version, query):
     if not os_version in config.OS_VERSIONS:
         return abort(404)
@@ -94,8 +94,24 @@ def search_results(os_version, query):
     package_versions_list = [all_packages_dict[os_version][result['name']][-1] for result in
                              results]
 
-    return render_template('results.html', os_version=os_version, results=package_versions_list,
-                           query=query, maximum_reached=maximum_reached)
+    return render_template('results.html',
+                           os_version=os_version,
+                           results=package_versions_list,
+                           query=query,
+                           maximum_reached=maximum_reached)
+
+
+@app.route('/<os_version>/all_packages/')
+def all_packages(os_version):
+    newest_versions = packages.newest_versions_as_list(os_version, all_packages_dict)
+    return render_template('all_packages.html',
+                           os_version=os_version,
+                           newest_versions=newest_versions)
+
+
+@app.route('/about/')
+def about():
+    return render_template('about.html')
 
 
 if __name__ == '__main__':

@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block page_title %}
+    {{ package.name }}
+{% endblock page_title %}
 {% block content %}
     <div class="col-md-8 main-package-content">
         {% if direct_hit %}
