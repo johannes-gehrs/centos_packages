@@ -13,7 +13,7 @@ searchkit = index.searchkit_factory()
 
 @app.after_request
 def cloudflare_caching(response):
-    if request.method == 'GET':
+    if request.method == 'GET' and (not app.debug or config.CACHE_IN_DEBUG_MODE):
         response.cache_control.max_age = config.CACHE_MAX_AGE
     return response
 
@@ -56,6 +56,8 @@ def root():
 
 @app.route('/<os_version>/', methods=['GET', 'POST'])
 def search(os_version):
+    if os_version not in config.OS_VERSIONS:
+        abort(404)
     if request.method == 'POST':
         search_query = request.form['search_query']
         if all_packages_dict[os_version].get(search_query):
