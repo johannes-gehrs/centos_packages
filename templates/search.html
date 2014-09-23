@@ -5,25 +5,89 @@
 {% block content %}
     <div class="text-center">
         <h1>Search CentOS packages online</h1>
+
         <p class="lead"><a href="http://centos-packages.com">centos-packages.com</a></p>
     </div>
     <div class="search-area well">
-        <form class="search-box text-center" role="form" method="post" action="{{ url_for('search', os_version=os_version) }}">
+        <form class="search-box text-center" role="form" method="post"
+              action="{{ url_for('search', os_version=os_version) }}">
             <div class="form-group">
-                <input class="form-control input-lg" type="text" name="search_query" spellcheck="false" id="search-input">
+                <input class="form-control input-lg" type="text" name="search_query"
+                       spellcheck="false" id="search-input">
             </div>
             <button type="submit" class="btn-lg btn-primary">Go</button>
         </form>
-    <ul class="list-inline search-support">
-        <li><a>Search help</a></li>
-        <li><a href="{{ url_for('all_packages', os_version=os_version) }}">All packages</a></li>
-    </ul>
+        <ul class="list-inline search-support">
+            <li><a href="javascript:void(0);" id="toggle-search-help"><span
+                    class="glyphicon glyphicon-question-sign glyphicon-search-help"></span>Toggle
+                search
+                help</a></li>
+            <li><a href="{{ url_for('all_packages', os_version=os_version) }}"><span
+                    class="glyphicon glyphicon-list glyphicon-search-help"></span>All
+                packages</a>
+            </li>
+        </ul>
+        <div id="search-help" class="row">
+            <div class="col-md-6">
+                <ul>
+                    <li>Searching for more than one word creates an implicit AND
+                        connection.
+                    </li>
+
+                    <li>Quoting "multiple words" searches for exact occurences of "multiple words".
+                    </li>
+
+                    <li>Boolean operators "NOT", "AND" and "OR" are supported. You can use
+                        parentheses to create groups.
+                    </li>
+                    <li>You can use unix style wildcards. "*" matches any characters, "?"
+                        matches single characters.
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul>
+                    <li>Package information is structured in fields. By default the
+                        following fields are searched: "name", "summary", and
+                        "description".
+                    </li>
+                    <li>
+                        You can alternatively search for specific fields, like so:
+                        "description: kernel".
+                    </li>
+                    <li>
+                        The following fields are also available:
+                        "arch" (CPU architecture),
+                        "version",
+                        "release",
+                        "url" (vendor site),
+                        "license".
+                    </li>
+                </ul>
+                <p><span
+                        class="glyphicon glyphicon-new-window glyphicon-search-help"></span><a
+                        href="https://pythonhosted.org/Whoosh/querylang.html">Extensive query
+                    language docs</a></p>
+            </div>
+        </div>
     </div>
 {% endblock content %}
 {% block scripts %}
-{{ super() }}
-<script>
-    $('#search-input').focus();
-</script>
+    {{ super() }}
+    <script>
+        $(document).ready(function () {
+            $(function () {
+                var $searchInput = $('#search-input');
+                var $searchHelp = $('#search-help');
+                $searchHelp.hide();
+                $searchInput.focus();
+                $('#toggle-search-help').click(function () {
+                    $searchHelp.toggle();
+                    $searchInput.focus();
+                });
+
+            });
+        });
+    </script>
 {% endblock scripts %}
 

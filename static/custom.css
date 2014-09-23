@@ -23,6 +23,11 @@
     color: #ebebeb;
 }
 
+.glyphicon-search-help {
+    margin-right: 0.5em;
+    color: #ebebeb;
+}
+
 .package-versions-table {
     max-width: 500px;
 }
