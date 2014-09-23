@@ -1,11 +1,31 @@
 from __future__ import absolute_import, division, unicode_literals
-from flask import Flask, render_template, redirect, url_for, request, abort, flash
+import urllib
+from flask import Flask, render_template, redirect, url_for, request, abort
 import packages
 import config
 import index
 
 app = Flask(__name__)
 all_packages_dict = packages.get_all()
+last_repodata_update = packages.get_timestamp()
+searchkit = index.searchkit_factory()
+
+
+@app.after_request
+def cloudflare_caching(response):
+    if request.method == 'GET':
+        response.cache_control.max_age = config.CACHE_MAX_AGE
+    return response
+
+
+@app.before_request
+def check_repodata_freshness():
+    global last_repodata_update, all_packages_dict, searchkit
+    timestamp = packages.get_timestamp()
+    if timestamp != last_repodata_update:
+        all_packages_dict = packages.get_all()
+        searchkit = index.searchkit_factory()
+
 
 
 @app.context_processor
@@ -44,7 +64,11 @@ def search(os_version):
                                     package_name=search_query,
                                     direct=True))
         if search_query:
-            return redirect(url_for('search_results', os_version=os_version, query=search_query))
+            quoted_search_query = urllib.quote_plus(search_query)
+            return redirect(url_for('search_results',
+                                    os_version=os_version,
+                                    quoted_query=quoted_search_query))
+
     return render_template('search.html', os_version=os_version)
 
 
@@ -75,15 +99,15 @@ def package_versions(os_version, package_name):
                            os_version=os_version)
 
 
-@app.route('/<os_version>/results/<query>/', methods=['GET'])
-def search_results(os_version, query):
+@app.route('/<os_version>/results/<quoted_query>/', methods=['GET'])
+def search_results(os_version, quoted_query):
+    query = urllib.unquote_plus(quoted_query)
+
     if not os_version in config.OS_VERSIONS:
         return abort(404)
 
-    ix = index.ix_factory(os_version)
-    searcher = ix.searcher()
-    parser = index.parser_factory(ix)
-
+    searcher = searchkit[os_version]['ix'].searcher()
+    parser = searchkit[os_version]['parser']
     results = searcher.search(parser.parse(query), limit=config.LIMIT_RESULTS)
 
     if len(results) >= config.LIMIT_RESULTS:

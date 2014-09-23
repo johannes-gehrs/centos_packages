@@ -9,6 +9,7 @@ REPOSITORIES_PRETTY = {'os': 'Base',
                        'extras': 'Extras',
                        'fasttrack': 'Fasttrack'}
 LIMIT_RESULTS = 250
+CACHE_MAX_AGE = 4260
 
 
 def active_repos():

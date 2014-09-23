@@ -186,7 +186,8 @@ def set_timestamp_to_now():
 
 def get_timestamp():
     with io.open(PACKAGE_TIMESTAMP_FILE, mode='rb') as myfile:
-        pickle.load(myfile)
+        timestamp = pickle.load(myfile)
+    return timestamp
 
 
 def rpm_download_url(package_version, os_version):

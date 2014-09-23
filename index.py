@@ -50,10 +50,19 @@ def write_indices():
         _write_index(os_version)
 
 
-def ix_factory(version):
-    index_dir = _index_dir(version)
+def _ix_factory(os_version):
+    index_dir = _index_dir(os_version)
     return whoosh.index.open_dir(index_dir)
 
 
-def parser_factory(ix):
+def _parser_factory(ix):
     return whoosh.qparser.MultifieldParser(["name", "summary", 'description'], ix.schema)
+
+
+def searchkit_factory():
+    searchkit = {}
+    for os_version in config.OS_VERSIONS:
+        ix = _ix_factory(os_version)
+        parser = _parser_factory(ix)
+        searchkit[os_version] = {'ix': ix, 'parser': parser}
+    return searchkit

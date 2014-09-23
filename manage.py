@@ -30,12 +30,12 @@ def _search(query, os_version):
         print "Unknown os_version."
         sys.exit(1)
 
-    ix = index.ix_factory(os_version)
-    searcher = ix.searcher()
-    parser = index.parser_factory(ix)
+    searchkit = index.searchkit_factory()
+    searcher = searchkit[os_version]['ix'].searcher()
+    myparser = searchkit[os_version]['parser']
 
     start_time = time.time()
-    results = searcher.search(parser.parse(query))
+    results = searcher.search(myparser.parse(query))
     for result in results:
         print result
     print _stopwatch(start_time)

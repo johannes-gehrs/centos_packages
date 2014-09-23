@@ -6,7 +6,7 @@
     <div class="col-md-8 main-package-content">
         {% if direct_hit %}
             <div class="well well-headsup">
-                <p>Your query directly matches a package name. <a href="{{ url_for("search_results", os_version=os_version, query=package.name) }}">
+                <p>Your query directly matches a package name. <a href="{{ url_for("search_results", os_version=os_version, quoted_query=package.name) }}">
                     Full search.</a></p>
             </div>
         {% endif %}
