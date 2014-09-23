@@ -10,6 +10,7 @@ REPOSITORIES_PRETTY = {'os': 'Base',
                        'fasttrack': 'Fasttrack'}
 LIMIT_RESULTS = 250
 CACHE_MAX_AGE = 4260
+CACHE_IN_DEBUG_MODE = False
 
 
 def active_repos():
