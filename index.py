@@ -35,7 +35,7 @@ def _write_index(os_version):
 
     index_dir = _index_dir(os_version)
     if not os.path.exists(index_dir):
-        os.mkdir(index_dir)
+        os.makedirs(index_dir)
 
     ix = whoosh.index.create_in(index_dir, schema)
     ix_writer = ix.writer()
