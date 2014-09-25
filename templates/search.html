@@ -27,7 +27,7 @@
                 packages</a>
             </li>
         </ul>
-        <div id="search-help" class="row">
+        <div id="search-help" class="row" style="display: none">
             <div class="col-md-6">
                 <ul>
                     <li>Searching for more than one word creates an implicit AND
@@ -79,7 +79,6 @@
             $(function () {
                 var $searchInput = $('#search-input');
                 var $searchHelp = $('#search-help');
-                $searchHelp.hide();
                 $searchInput.focus();
                 $('#toggle-search-help').click(function () {
                     $searchHelp.toggle();
