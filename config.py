@@ -24,4 +24,6 @@ LOGDIR = DATA_DIR + 'log/'
 LOGFILE = LOGDIR + 'centos_packages.log'
 if not os.path.isdir(LOGDIR):
     os.makedirs(LOGDIR)
-logging.basicConfig(filename=LOGFILE,level=logging.INFO)
+logging.basicConfig(filename=LOGFILE,
+                    level=logging.INFO,
+                    format='%(asctime)s %(levelname)s: %(message)s')

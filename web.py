@@ -6,10 +6,11 @@ from flask import Flask, render_template, redirect, url_for, request, abort
 import packages
 import index
 
+logging.info('Starting web application...')
 app = Flask(__name__)
-all_packages_dict = packages.get_all()
-last_repodata_update = packages.get_timestamp()
-searchkit = index.searchkit_factory()
+all_packages_dict = None
+last_repodata_update = None
+searchkit = None
 
 
 @app.after_request
@@ -23,12 +24,12 @@ def cloudflare_caching(response):
 def check_repodata_freshness():
     global last_repodata_update, all_packages_dict, searchkit
     timestamp = packages.get_timestamp()
-    logging.log(logging.DEBUG, 'Timestamp needs update: ' +
-                               unicode(timestamp != last_repodata_update))
     if timestamp != last_repodata_update:
+        logging.info('Loading package data and index...')
         all_packages_dict = packages.get_all()
         searchkit = index.searchkit_factory()
         last_repodata_update = packages.get_timestamp()
+        logging.info('Done loading package data and reloading index.')
 
 
 @app.context_processor
