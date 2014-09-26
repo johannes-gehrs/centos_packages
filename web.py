@@ -1,8 +1,9 @@
 from __future__ import absolute_import, division, unicode_literals
 import urllib
+import logging
+import config
 from flask import Flask, render_template, redirect, url_for, request, abort
 import packages
-import config
 import index
 
 app = Flask(__name__)
@@ -22,10 +23,12 @@ def cloudflare_caching(response):
 def check_repodata_freshness():
     global last_repodata_update, all_packages_dict, searchkit
     timestamp = packages.get_timestamp()
+    logging.log(logging.DEBUG, 'Timestamp needs update: ' +
+                               unicode(timestamp != last_repodata_update))
     if timestamp != last_repodata_update:
         all_packages_dict = packages.get_all()
         searchkit = index.searchkit_factory()
-
+        last_repodata_update = packages.get_timestamp()
 
 
 @app.context_processor
