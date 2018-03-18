@@ -3,11 +3,6 @@
     Search
 {% endblock page_title %}
 {% block content %}
-    <div class="text-center">
-        <h1>Search CentOS packages online</h1>
-
-        <p class="lead"><a href="http://centos-packages.com">centos-packages.com</a></p>
-    </div>
     <div class="search-area well">
         <form class="search-box text-center" role="form" method="post"
               action="{{ url_for('search', os_version=os_version) }}">
