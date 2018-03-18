@@ -1,7 +1,7 @@
 About
 ====
 
-Update 2018-03: Now available at https://centos-packages.jogehrs.com/ after I screwed up keeping the original TLS registered.
+Update 2018-03: Now available at http://centos-packages.jogehrs.com/ after I screwed up keeping the original TLD registered.
 
 This is a personal project by Johannes Gehrs, not associated with CentOS. I was annoyed by the fact that I could not search for CentOS packages on the web and therefore wrote this webapp.
 
